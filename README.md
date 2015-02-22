@@ -30,7 +30,7 @@ Development in progress
     },
     {
       "alias" : "host1",
-      "host" : "tcp://192.168.0.1:2376",
+      "host" : "tcp://192.168.0.1:2376"
     }
   ]
 }
