@@ -1,10 +1,13 @@
 package cli
 
+import (
+    "time"
+    "github.com/crackcomm/go-clitable"
+)
+
 func ExtendMDContainersList(slice []MDContainer, element MDContainer) []MDContainer {
 	n := len(slice)
 	if n == cap(slice) {
-		// Slice is full; must grow.
-		// We double its size and add 1, so if the size is zero we still grow.
 		newSlice := make([]MDContainer, len(slice), 2*len(slice)+1)
 		copy(newSlice, slice)
 		slice = newSlice
@@ -15,9 +18,18 @@ func ExtendMDContainersList(slice []MDContainer, element MDContainer) []MDContai
 }
 
 func PrintMDContainersList(slice []MDContainer) {
-	table.PrintHorizontal(map[string]string{
-		"Name": "MongoLab",
-		"Host": "mongolab.com",
-		// ...
-	})
+    table := clitable.New([]string{"NODE", "HOST","CONTAINER ID","IMAGE","COMMAND","CREATED","STATUS"})
+    for i := 0; i < len(slice); i++ {
+        values := map[string]interface{}{
+            "NODE" : slice[i].Node.Alias,
+            "HOST" : slice[i].Node.Host,
+            "CONTAINER ID" : slice[i].Container.Id[:12],
+            "IMAGE" : slice[i].Container.Image,
+            "COMMAND" : slice[i].Container.Command,
+            "CREATED" : time.Unix(slice[i].Container.Created,0),
+            "STATUS" : slice[i].Container.Status,
+        }
+        table.AddRow(values)
+    }
+    table.Print()
 }

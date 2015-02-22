@@ -8,10 +8,6 @@
         "certFile": "/Users/fsamin/.boot2docker/certs/boot2docker-vm/cert.pem",
         "keyFile":  "/Users/fsamin/.boot2docker/certs/boot2docker-vm/key.pem"
       }
-    },
-    {
-      "alias" : "localhost",
-      "host": "unix:///var/run/docker.sock"
     }
   ]
 }

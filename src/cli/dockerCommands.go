@@ -35,13 +35,12 @@ func listContainers(c *cli.Context) {
 
 		// Wrap all containers into MDContainer
 		for _, c := range containers {
-			log.Println(c.Id, c.Names)
 			mdContainer := MDContainer{
-				node:      n,
-				container: &c,
+				Node:      n,
+				Container: &c,
 			}
 			ret = ExtendMDContainersList(ret, mdContainer)
 		}
 	}
-
+    PrintMDContainersList(ret)
 }

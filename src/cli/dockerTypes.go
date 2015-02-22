@@ -6,11 +6,11 @@ import (
 )
 
 type MDContainer struct {
-	node      *desc.Node
-	container *dockerclient.Container
+	Node      *desc.Node
+	Container *dockerclient.Container
 }
 
 type MDImage struct {
-	node  *desc.Node
-	image *dockerclient.Image
+	Node  *desc.Node
+	Image *dockerclient.Image
 }
