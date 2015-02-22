@@ -35,7 +35,8 @@ Development in progress
   ]
 }
 ```
-###Run 
+###Run
+####List running containers
  `$ multidocker ps`
 
 ```
