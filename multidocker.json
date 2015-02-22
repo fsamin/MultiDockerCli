@@ -1,0 +1,17 @@
+{
+  "nodes" : [
+    {
+      "alias" : "boot2docker",
+      "host" : "tcp://192.168.59.103:2376",
+      "cert" : {
+        "caFile":   "/Users/fsamin/.boot2docker/certs/boot2docker-vm/ca.pem",
+        "certFile": "/Users/fsamin/.boot2docker/certs/boot2docker-vm/cert.pem",
+        "keyFile":  "/Users/fsamin/.boot2docker/certs/boot2docker-vm/key.pem"
+      }
+    },
+    {
+      "alias" : "localhost",
+      "host": "unix:///var/run/docker.sock"
+    }
+  ]
+}
