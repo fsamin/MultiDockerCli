@@ -15,7 +15,7 @@ Development in progress
  ```
 
 ## How to use
-###Edit a `multidocker.json` file.
+#####Edit a `multidocker.json` file.
 ```
 {
   "nodes" : [
@@ -35,8 +35,8 @@ Development in progress
   ]
 }
 ```
-###Run
-####List running containers
+##Run
+###List running containers
 #####NAME:
    ps - List containers
 
@@ -45,6 +45,7 @@ Development in progress
 
 #####OPTIONS:
    --all, -a    List all containers. Only running containers are shown by default.
+
    --size, -s   Show size
 
 
@@ -62,7 +63,7 @@ $ multidocker ps
 |--------------------------------------------------------------------------------------------------------------------------------------------------|
 ```
 
-####List images
+###List images
 #####NAME:
    images - List images
 
@@ -71,6 +72,7 @@ $ multidocker ps
 
 #####OPTIONS:
    --all, -a    List all images (by default filter out the intermediate image layers)
+
    --size, -s   Show size
 
 #####EXAMPLE:
