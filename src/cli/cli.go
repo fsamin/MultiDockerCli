@@ -21,8 +21,16 @@ func NewCli() *cli.App {
         {
             Name:  "images",
             Usage: "List images",
-            Action: func(c *cli.Context) {
-                println("list images: ", c.Args().First())
+            Action: listImages,
+            Flags: []cli.Flag{
+                cli.BoolFlag{
+                    Name: "all, a",
+                    Usage: "List all images (by default filter out the intermediate image layers)",
+                },
+                cli.BoolFlag{
+                    Name: "size, s",
+                    Usage: "Show size",
+                },
             },
         }, {
             Name:   "ps",
@@ -31,7 +39,7 @@ func NewCli() *cli.App {
             Flags: []cli.Flag{
                 cli.BoolFlag{
                     Name: "all, a",
-                    Usage: "List all containers",
+                    Usage: "List all containers. Only running containers are shown by default.",
                 },
                 cli.BoolFlag{
                     Name: "size, s",
