@@ -10,6 +10,10 @@ type MDContainer struct {
 	Container *dockerclient.Container
 }
 
+func NewMDContainer(node *desc.Node, container *dockerclient.Container) MDContainer {
+    return MDContainer{node, container}
+}
+
 type MDImage struct {
 	Node  *desc.Node
 	Image *dockerclient.Image

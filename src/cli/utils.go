@@ -13,13 +13,18 @@ func ExtendMDContainersList(slice []MDContainer, element MDContainer) []MDContai
 		slice = newSlice
 	}
 	slice = slice[0 : n+1]
+
 	slice[n] = element
 	return slice
 }
 
-func PrintMDContainersList(slice []MDContainer) {
+func PrintMDContainersList(slice []MDContainer, showSize bool) {
     table := clitable.New([]string{"NODE", "HOST","CONTAINER ID","IMAGE","COMMAND","CREATED","STATUS"})
-    for i := 0; i < len(slice); i++ {
+    if showSize {
+        table = clitable.New([]string{"NODE", "HOST","CONTAINER ID","IMAGE","COMMAND","CREATED","STATUS", "SIZE"})
+    }
+
+    for i := 0; i < len(slice);i++ {
         values := map[string]interface{}{
             "NODE" : slice[i].Node.Alias,
             "HOST" : slice[i].Node.Host,
@@ -28,8 +33,10 @@ func PrintMDContainersList(slice []MDContainer) {
             "COMMAND" : slice[i].Container.Command,
             "CREATED" : time.Unix(slice[i].Container.Created,0),
             "STATUS" : slice[i].Container.Status,
+            "SIZE" : slice[i].Container.SizeRootFs,
         }
         table.AddRow(values)
     }
+    table.Markdown = true
     table.Print()
 }

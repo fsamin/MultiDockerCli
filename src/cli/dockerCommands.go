@@ -7,9 +7,25 @@ import (
 )
 
 func listContainers(c *cli.Context) {
-	reader := desc.MultiDockerDescReader{
+    //Get flag to list all containers (ie. running, and not running)
+    showAll := c.Bool("all")
+
+    //Get flag to showSize
+    showSize := c.Bool("size")
+
+    //Get Verbose flag
+    debug := c.GlobalBool("debug")
+
+    //Get args to filters on containers
+    var filters string = ""
+    if c.Args().Present() {
+        filters = c.Args().First()
+    }
+
+    reader := desc.MultiDockerDescReader{
 		File: "multidocker.json",
 	}
+
 	multidocker, err := reader.NewMultiDockerDesc()
 	if err != nil {
 		log.Fatal(err)
@@ -28,19 +44,28 @@ func listContainers(c *cli.Context) {
 		docker, _ := api.ConnectToDocker(n.Alias)
 
 		// Get only running containers
-		containers, err := docker.ListContainers(false, false, "")
+		containers, err := docker.ListContainers(showAll, false, filters)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		// Wrap all containers into MDContainer
-		for _, c := range containers {
-			mdContainer := MDContainer{
-				Node:      n,
-				Container: &c,
-			}
+        for idxC:=0; idxC < len(containers); idxC++ {
+            c:=containers[idxC]
+            mdContainer := MDContainer{
+                Container:&c,
+                Node:n,
+            }
+
+            if debug {
+                log.Println("\t", mdContainer.Container.Id[:12], mdContainer.Container.Names)
+            }
 			ret = ExtendMDContainersList(ret, mdContainer)
+
 		}
 	}
-    PrintMDContainersList(ret)
+
+
+
+    PrintMDContainersList(ret, showSize)
 }

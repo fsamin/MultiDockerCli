@@ -10,7 +10,7 @@ Development in progress
 ## Installation
 ```
  $ git clone https://github.com/fsamin/MultiDockerCli.git
- $ cd MultiDockerCli`
+ $ cd MultiDockerCli
  $ make && sudo make install
  ```
 
