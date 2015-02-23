@@ -37,9 +37,21 @@ Development in progress
 ```
 ###Run
 ####List running containers
- `$ multidocker ps`
+#####NAME:
+   ps - List containers
 
+#####USAGE:
+   command ps [command options] [arguments...]
+
+#####OPTIONS:
+   --all, -a    List all containers. Only running containers are shown by default.
+   --size, -s   Show size
+
+
+#####EXAMPLE:
 ```
+$ multidocker ps
+
 2015/02/22 18:12:54 Connecting to docker node boot2docker::tcp://192.168.59.103:2376 (version 1.5.0)
 2015/02/22 18:12:54 Connecting to docker node host1::tcp://192.168.0.1:2376 (version 1.5.0)
 |--------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -50,4 +62,26 @@ Development in progress
 |--------------------------------------------------------------------------------------------------------------------------------------------------|
 ```
 
- 
+####List images
+#####NAME:
+   images - List images
+
+#####USAGE:
+   command images [command options] [arguments...]
+
+#####OPTIONS:
+   --all, -a    List all images (by default filter out the intermediate image layers)
+   --size, -s   Show size
+
+#####EXAMPLE:
+```
+$ multidocker images -s
+
+2015/02/23 18:18:52 Connecting to docker node boot2docker::tcp://192.168.59.103:2376 (version 1.5.0)
+2015/02/23 18:18:52 Connecting to docker node host1::tcp://192.168.0.1:2376 (version 1.5.0)
+| NODE        | HOST                      | IMAGE ID     | TAGS             | CREATED                       | VIRTUAL SIZE |
+| ----------- | ------------------------- | ------------ | ---------------- | ----------------------------- | ------------ |
+| boot2docker | tcp://192.168.59.103:2376 | 41001f44325b | [jenkins:latest] | 2015-01-05 23:26:59 +0100 CET | 661530758    |
+| host1       | tcp://192.168.0.1:2376    | 41001f44325b | [jenkins:latest] | 2015-01-05 23:27:02 +0100 CET | 661530758    |
+
+``
