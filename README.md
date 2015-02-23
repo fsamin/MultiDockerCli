@@ -1,6 +1,6 @@
 # MultiDockerCli
 
-MultiDockerCli is just a way to user docker on several hosts (you know if you still don't  use docker swarm...)
+MultiDockerCli is just a way to use docker on several hosts (you know if you still don't use docker swarm...)
 
 Development in progress
 
