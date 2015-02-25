@@ -40,7 +40,7 @@ func (dockerApi *DockerApi) ConnectToDocker(nodeAlias string) (*dockerclient.Doc
 		return nil, err
 	}
 	if node.Available == false {
-		log.Fatal("Docker node : " + node.Alias + "::" + node.Host + " is unreachable")
+		log.Println("Docker node : " + node.Alias + "::" + node.Host + " is unreachable")
 		return nil, errors.New("Docker node : " + node.Alias + "::" + node.Host + " is unreachable")
 	}
 

@@ -2,7 +2,19 @@ package cli
 
 import (
     "github.com/codegangsta/cli"
-)
+    "log"
+    "os")
+
+var multiDockerCommand *DockerCommand
+
+func init() {
+    commands, err := NewDockerCommand()
+    if err != nil {
+        log.Fatal("Cannot initialize CLI", err)
+        os.Exit(1)
+    }
+    multiDockerCommand = commands
+}
 
 func NewCli() *cli.App {
     app := cli.NewApp()
@@ -21,7 +33,7 @@ func NewCli() *cli.App {
         {
             Name:  "images",
             Usage: "List images",
-            Action: listImages,
+            Action: multiDockerCommand.ListImages,
             Flags: []cli.Flag{
                 cli.BoolFlag{
                     Name: "all, a",
@@ -35,7 +47,7 @@ func NewCli() *cli.App {
         }, {
             Name:   "ps",
             Usage:  "List containers",
-            Action: listContainers,
+            Action: multiDockerCommand.ListContainers,
             Flags: []cli.Flag{
                 cli.BoolFlag{
                     Name: "all, a",
@@ -46,7 +58,12 @@ func NewCli() *cli.App {
                     Usage: "Show size",
                 },
             },
+        }, {
+            Name: "pull",
+            Usage: "Pull an image or a repository from the registry. Set argument to IMAGE[:TAG]",
+            Action: multiDockerCommand.PullImage,
         },
     }
     return app
 }
+
