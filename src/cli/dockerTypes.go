@@ -14,3 +14,10 @@ type MDImage struct {
 	Node  *desc.Node
 	Image *dockerclient.Image
 }
+
+type MDPulledImage struct {
+    Node *desc.Node
+    Name string
+    Success bool
+    Error error
+}

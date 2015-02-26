@@ -4,7 +4,8 @@ import (
     "../desc"
     "github.com/codegangsta/cli"
     "log"
-    "os")
+    "os"
+)
 
 type DockerCommand struct {
     Descriptor *desc.MultiDockerDesc
@@ -123,12 +124,44 @@ func (d *DockerCommand) PullImage(c *cli.Context) {
     if debug {
         log.Printf("Pulling image %s on hosts", name)
     }
+    //Prepare channel for errors management
+    chanPulledImage := make(chan MDPulledImage)
+
     //Iterate over all nodes
     for i := 0; i < len(d.Descriptor.Nodes); i++ {
         n := &d.Descriptor.Nodes[i]
         docker, _ := d.Api.ConnectToDocker(n.Alias)
-        if docker != nil {
-            //docker.PullImage()
+        if debug {
+            log.Printf("Pulling image %s on host %s::%s", name, n.Alias, n.Host)
         }
+        if docker != nil {
+            go func() {
+                err := docker.PullImage(name, nil)
+                if err != nil {
+                    log.Printf("Cannot pull image %s on host %s::%s", name, n.Alias, n.Host)
+                    log.Printf("\t|__%s", err)
+                    chanPulledImage <- MDPulledImage{
+                        Node: n,
+                        Name: name,
+                        Success: false,
+                        Error: err,
+                    }
+                } else {
+                    chanPulledImage <- MDPulledImage{
+                        Node: n,
+                        Name: name,
+                        Success: true,
+                        Error: nil,
+                    }
+                }
+            }()
+        }
+    }
+
+    pulledImage := <-chanPulledImage
+    log.Printf(pulledImage.Name)
+
+    if debug {
+        log.Printf("End");
     }
 }
