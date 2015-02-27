@@ -5,7 +5,7 @@ import (
     "github.com/codegangsta/cli"
     "log"
     "os"
-)
+    "sync")
 
 type DockerCommand struct {
     Descriptor *desc.MultiDockerDesc
@@ -124,8 +124,11 @@ func (d *DockerCommand) PullImage(c *cli.Context) {
     if debug {
         log.Printf("Pulling image %s on hosts", name)
     }
+
     //Prepare channel for errors management
-    chanPulledImage := make(chan MDPulledImage)
+    chanPulledImage := make(chan MDPulledImage, len(d.Descriptor.Nodes))
+
+    var wg sync.WaitGroup
 
     //Iterate over all nodes
     for i := 0; i < len(d.Descriptor.Nodes); i++ {
@@ -135,6 +138,7 @@ func (d *DockerCommand) PullImage(c *cli.Context) {
             log.Printf("Pulling image %s on host %s::%s", name, n.Alias, n.Host)
         }
         if docker != nil {
+            wg.Add(1)
             go func() {
                 err := docker.PullImage(name, nil)
                 if err != nil {
@@ -154,12 +158,24 @@ func (d *DockerCommand) PullImage(c *cli.Context) {
                         Error: nil,
                     }
                 }
+                wg.Done();
             }()
         }
     }
 
-    pulledImage := <-chanPulledImage
-    log.Printf(pulledImage.Name)
+    wg.Wait()
+    close(chanPulledImage)
+
+    for pulledImage := range chanPulledImage {
+        var status string
+        if pulledImage.Success {
+            status = "OK"
+        } else {
+            status = "KO"
+        }
+        log.Printf("%s::%s - Pulling %s\t%s", pulledImage.Node.Alias, pulledImage.Node.Host, pulledImage.Name, status)
+    }
+
 
     if debug {
         log.Printf("End");
