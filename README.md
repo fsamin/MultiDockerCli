@@ -84,4 +84,25 @@ $ multidocker images -s
 | boot2docker | tcp://192.168.59.103:2376 | 41001f44325b | [jenkins:latest] | 2015-01-05 23:26:59 +0100 CET | 661530758    |
 | host1       | tcp://192.168.0.1:2376    | 41001f44325b | [jenkins:latest] | 2015-01-05 23:27:02 +0100 CET | 661530758    |
 
-``
+```
+
+###Pull images
+####NAME:
+   pull - Pull an image or a repository from the registry. Set argument to IMAGE[:TAG]
+
+####USAGE:
+   command pull [arguments...]
+
+#####EXAMPLE:
+```
+$ multidocker pull debian:jessie
+
+2015/02/28 11:21:56 Connecting to docker node boot2docker::tcp://192.168.59.103:2376 (version 1.5.0)
+2015/02/28 11:21:56 Connecting to docker node host1::tcp://192.168.0.1:2376 (version 1.5.0)
+| NODE        | HOST                      | IMAGE         | STATUS |
+| ----------- | ------------------------- | ------------- | ------ |
+| boot2docker | tcp://192.168.59.103:2376 | debian:jessie | OK     |
+| host1       | tcp://192.168.0.1:2376    | debian:jessie | OK     |
+
+
+```
