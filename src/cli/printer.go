@@ -5,7 +5,14 @@ import (
     "github.com/crackcomm/go-clitable"
 )
 
-func PrintMDContainersList(slice []MDContainer, showSize bool) {
+type Printer struct{}
+
+func NewPrinter() (*Printer) {
+    ret := new(Printer)
+    return ret
+}
+
+func (*Printer) PrintMDContainersList(slice []MDContainer, showSize bool) {
     table := clitable.New([]string{"NODE", "HOST","CONTAINER ID","IMAGE","COMMAND","CREATED","STATUS"})
     if showSize {
         table = clitable.New([]string{"NODE", "HOST","CONTAINER ID","IMAGE","COMMAND","CREATED","STATUS", "SIZE"})
@@ -28,7 +35,7 @@ func PrintMDContainersList(slice []MDContainer, showSize bool) {
     table.Print()
 }
 
-func PrintMDImagesList(slice []MDImage, showSize bool) {
+func (*Printer) PrintMDImagesList(slice []MDImage, showSize bool) {
     table := clitable.New([]string{"NODE", "HOST","IMAGE ID","TAGS","CREATED"})
     if showSize {
         table = clitable.New([]string{"NODE", "HOST","IMAGE ID","TAGS","CREATED", "VIRTUAL SIZE"})
@@ -42,6 +49,28 @@ func PrintMDImagesList(slice []MDImage, showSize bool) {
             "TAGS" : slice[i].Image.RepoTags,
             "CREATED" : time.Unix(slice[i].Image.Created,0),
             "VIRTUAL SIZE" : slice[i].Image.VirtualSize,
+        }
+        table.AddRow(values)
+    }
+    table.Markdown = true
+    table.Print()
+}
+
+func (*Printer) PrintMDPulledImages(slice []MDPulledImage) {
+    table := clitable.New([]string{"NODE", "HOST","IMAGE","STATUS"})
+
+    for i := 0; i < len(slice);i++ {
+        var status string
+        if (slice[i].Success) {
+            status = "OK"
+        } else {
+            status = "Error"
+        }
+        values := map[string]interface{}{
+            "NODE" : slice[i].Node.Alias,
+            "HOST" : slice[i].Node.Host,
+            "IMAGE" : slice[i].Name,
+            "STATUS" : status,
         }
         table.AddRow(values)
     }

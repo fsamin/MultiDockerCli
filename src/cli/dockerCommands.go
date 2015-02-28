@@ -5,11 +5,13 @@ import (
     "github.com/codegangsta/cli"
     "log"
     "os"
-    "sync")
+    "sync"
+)
 
 type DockerCommand struct {
     Descriptor *desc.MultiDockerDesc
     Api *DockerApi
+    Printer *Printer
 }
 
 func NewDockerCommand() (*DockerCommand, error) {
@@ -65,11 +67,11 @@ func (d *DockerCommand) ListContainers(c *cli.Context) {
                 if debug {
                     log.Println("\t", mdContainer.Container.Id[:12], mdContainer.Container.Names)
                 }
-                ret = ExtendMDContainersList(ret, mdContainer)
+                ret = append(ret, mdContainer)
             }
         }
     }
-    PrintMDContainersList(ret, showSize)
+    d.Printer.PrintMDContainersList(ret, showSize)
 }
 
 func (d *DockerCommand) ListImages(c *cli.Context) {
@@ -103,11 +105,11 @@ func (d *DockerCommand) ListImages(c *cli.Context) {
                 if debug {
                     log.Println("\t", mdImage.Image.Id[:12], mdImage.Image.RepoTags)
                 }
-                ret = ExtendMDImageList(ret, mdImage)
+                ret = append(ret, mdImage)
             }
         }
     }
-    PrintMDImagesList(ret, showSize)
+    d.Printer.PrintMDImagesList(ret, showSize)
 }
 
 func (d *DockerCommand) PullImage(c *cli.Context) {
@@ -139,6 +141,7 @@ func (d *DockerCommand) PullImage(c *cli.Context) {
         }
         if docker != nil {
             wg.Add(1)
+            //TODO put a nice progressbar
             go func() {
                 err := docker.PullImage(name, nil)
                 if err != nil {
@@ -162,10 +165,12 @@ func (d *DockerCommand) PullImage(c *cli.Context) {
             }()
         }
     }
-
+    //Wait goroutines
     wg.Wait()
+    //Then close the channel, to read it
     close(chanPulledImage)
 
+    var ret = []MDPulledImage{}
     for pulledImage := range chanPulledImage {
         var status string
         if pulledImage.Success {
@@ -173,9 +178,18 @@ func (d *DockerCommand) PullImage(c *cli.Context) {
         } else {
             status = "KO"
         }
-        log.Printf("%s::%s - Pulling %s\t%s", pulledImage.Node.Alias, pulledImage.Node.Host, pulledImage.Name, status)
+        if debug {
+            log.Printf("%s::%s - Pulling %s\t%s", pulledImage.Node.Alias, pulledImage.Node.Host, pulledImage.Name, status)
+        }
+        ret = append(ret,
+            MDPulledImage{
+                Node: pulledImage.Node,
+                Name: pulledImage.Name,
+                Success: pulledImage.Success,
+                Error: pulledImage.Error})
     }
 
+    d.Printer.PrintMDPulledImages(ret)
 
     if debug {
         log.Printf("End");
