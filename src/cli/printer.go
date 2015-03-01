@@ -46,7 +46,7 @@ func (*Printer) PrintMDImagesList(slice []MDImage, showSize bool) {
             "NODE" : slice[i].Node.Alias,
             "HOST" : slice[i].Node.Host,
             "IMAGE ID" : slice[i].Image.Id[:12],
-            "TAGS" : slice[i].Image.RepoTags,
+            "TAGS" : slice[i].Image.RepoTags[:1],
             "CREATED" : time.Unix(slice[i].Image.Created,0),
             "VIRTUAL SIZE" : slice[i].Image.VirtualSize,
         }

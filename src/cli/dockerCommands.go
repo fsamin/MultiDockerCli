@@ -119,6 +119,8 @@ func (d *DockerCommand) PullImage(c *cli.Context) {
     debug := c.GlobalBool("debug")
     //Get image Name
     name := c.Args().First()
+
+
     if name == "" {
         log.Fatal("multidocker pull requires 1 argument. See 'multidocker pull --help'.")
         os.Exit(1)
@@ -136,6 +138,7 @@ func (d *DockerCommand) PullImage(c *cli.Context) {
     for i := 0; i < len(d.Descriptor.Nodes); i++ {
         n := &d.Descriptor.Nodes[i]
         docker, _ := d.Api.ConnectToDocker(n.Alias)
+
         if debug {
             log.Printf("Pulling image %s on host %s::%s", name, n.Alias, n.Host)
         }
@@ -144,6 +147,7 @@ func (d *DockerCommand) PullImage(c *cli.Context) {
             //TODO put a nice progressbar
             go func() {
                 err := docker.PullImage(name, nil)
+
                 if err != nil {
                     log.Printf("Cannot pull image %s on host %s::%s", name, n.Alias, n.Host)
                     log.Printf("\t|__%s", err)

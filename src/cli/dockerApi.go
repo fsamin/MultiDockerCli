@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 
 	"../desc"
+    "fmt"
 	"errors"
 	"github.com/samalba/dockerclient"
 	"log"
@@ -44,7 +45,7 @@ func (dockerApi *DockerApi) ConnectToDocker(nodeAlias string) (*dockerclient.Doc
 		return nil, errors.New("Docker node : " + node.Alias + "::" + node.Host + " is unreachable")
 	}
 
-	log.Printf("Connecting to docker node %s::%s (version %s)", node.Alias, node.Host, node.ApiVersion)
+	fmt.Printf("Connecting to docker node %s::%s (version %s)\n", node.Alias, node.Host, node.ApiVersion)
 	dockerClient, err := getDockerClient(node)
 	return dockerClient, err
 }
