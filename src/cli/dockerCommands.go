@@ -199,3 +199,23 @@ func (d *DockerCommand) PullImage(c *cli.Context) {
         log.Printf("End");
     }
 }
+
+func (d *DockerCommand) StopContainers(c *cli.Context) {
+    //Check nodes
+    d.Api.CheckDockerNodes()
+    //Get Verbose flag
+    debug := c.GlobalBool("debug")
+    //Get Nodes slice
+    nodes := c.StringSlice("node");
+    //Get Nodes image
+    images := c.StringSlice("image");
+
+    if debug {
+        for i:= 0; i < len(images); i++ {
+            for j:= 0; j < len(nodes); j++ {
+                log.Printf("Stopping gracefully containers %s on node %s", images[i], nodes[j])
+            }
+        }
+    }
+
+}

@@ -62,6 +62,25 @@ func NewCli() *cli.App {
             Name: "pull",
             Usage: "Pull an image or a repository from the registry. Set argument to IMAGE[:TAG]",
             Action: multiDockerCommand.PullImage,
+        }, {
+            Name: "stop",
+            Usage: "Stop running containers by sending SIGTERM and then SIGKILL after a grace period",
+            Action: multiDockerCommand.StopContainers,
+            Flags: []cli.Flag{
+                cli.IntFlag{
+                    Name: "time, t",
+                    Value: 10,
+                    Usage : "Number of seconds to wait for the container to stop before killing it. Default is 10 seconds.",
+                }, cli.StringSliceFlag{
+                    Name: "node",
+                    Value: &cli.StringSlice{},
+                    Usage: "Nodes aliases on which running containers will be stopped ",
+                }, cli.StringSliceFlag{
+                    Name: "image",
+                    Value: &cli.StringSlice{},
+                    Usage: "Stop all running container using thoses images",
+                },
+            },
         },
     }
     return app

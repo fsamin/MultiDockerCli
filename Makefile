@@ -1,5 +1,6 @@
 all: multidocker
 
+
 multidocker:
 	go build src/desc/*.go
 	go build src/cli/*.go
