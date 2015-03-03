@@ -6,7 +6,7 @@ import (
     "log"
     "os"
     "sync"
-)
+    "fmt")
 
 type DockerCommand struct {
     Descriptor *desc.MultiDockerDesc
@@ -186,11 +186,11 @@ func (d *DockerCommand) PullImage(c *cli.Context) {
             log.Printf("%s::%s - Pulling %s\t%s", pulledImage.Node.Alias, pulledImage.Node.Host, pulledImage.Name, status)
         }
         ret = append(ret,
-            MDPulledImage{
-                Node: pulledImage.Node,
-                Name: pulledImage.Name,
-                Success: pulledImage.Success,
-                Error: pulledImage.Error})
+        MDPulledImage{
+            Node: pulledImage.Node,
+            Name: pulledImage.Name,
+            Success: pulledImage.Success,
+            Error: pulledImage.Error})
     }
 
     d.Printer.PrintMDPulledImages(ret)
@@ -201,21 +201,77 @@ func (d *DockerCommand) PullImage(c *cli.Context) {
 }
 
 func (d *DockerCommand) StopContainers(c *cli.Context) {
-    //Check nodes
-    d.Api.CheckDockerNodes()
     //Get Verbose flag
     debug := c.GlobalBool("debug")
     //Get Nodes slice
-    nodes := c.StringSlice("node");
+    nodes := c.StringSlice("node")
     //Get Nodes image
-    images := c.StringSlice("image");
+    images := c.StringSlice("image")
+    //Get timeout
+    timeout := c.Int("time")
 
-    if debug {
-        for i:= 0; i < len(images); i++ {
-            for j:= 0; j < len(nodes); j++ {
-                log.Printf("Stopping gracefully containers %s on node %s", images[i], nodes[j])
+
+    chanContainer := make(chan MDContainer, len(nodes) * len(images))
+    chanError := make(chan error, len(nodes) * len(images))
+
+    var wg sync.WaitGroup
+
+    for idxNode := 0; idxNode < len(nodes); idxNode++ {
+        log.Print("Connecting to " + nodes[idxNode])
+        go func() {
+            wg.Add(1)
+
+            docker, err := d.Api.ConnectToDocker(nodes[idxNode])
+            if err != nil {
+                chanError <- err
+            } else {
+                containers, err := docker.ListContainers(false, false, "")
+                if err != nil {
+                    chanError <- err
+                } else {
+                    var wg1 sync.WaitGroup
+                    for idxImage := 0; idxImage < len(images); idxImage++ {
+                        if debug {
+                            log.Printf("Stopping gracefully containers %s on node %s", images[idxImage], nodes[idxNode])
+                        }
+                        for idxContainer := 0; idxContainer < len(containers); idxContainer++ {
+                            go func() {
+                                wg1.Add(1)
+                                if containers[idxContainer].Image ==  images[idxContainer] {
+                                    err := docker.StopContainer(containers[idxContainer].Id, timeout)
+                                    if err != nil {
+                                        chanError <- err
+                                    } else {
+                                        n, _ := d.Api.getNode(nodes[idxNode])
+                                        chanContainer <- MDContainer{
+                                            Node: n,
+                                            Container: &containers[idxContainer],
+                                        }
+                                    }
+                                }
+                                wg1.Done()
+
+                            }()
+                        }
+                    }
+                    wg.Wait()
+                }
             }
-        }
+            wg.Done()
+        }()
+    }
+
+    wg.Wait()
+
+    close(chanContainer)
+    close(chanError)
+
+    for c := range chanContainer {
+        fmt.Println(c)
+    }
+
+    for err := range chanError {
+        fmt.Println(err)
     }
 
 }
