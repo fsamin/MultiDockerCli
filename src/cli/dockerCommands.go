@@ -6,7 +6,8 @@ import (
     "log"
     "os"
     "sync"
-    "fmt")
+    "fmt"
+    "github.com/samalba/dockerclient")
 
 type DockerCommand struct {
     Descriptor *desc.MultiDockerDesc
@@ -217,11 +218,10 @@ func (d *DockerCommand) StopContainers(c *cli.Context) {
     var wg sync.WaitGroup
 
     for idxNode := 0; idxNode < len(nodes); idxNode++ {
-        log.Print("Connecting to " + nodes[idxNode])
-        go func() {
+        go func(nodeAlias string) {
             wg.Add(1)
-
-            docker, err := d.Api.ConnectToDocker(nodes[idxNode])
+            log.Print("Connecting to " + nodeAlias)
+            docker, err := d.Api.ConnectToDocker(nodeAlias)
             if err != nil {
                 chanError <- err
             } else {
@@ -235,32 +235,30 @@ func (d *DockerCommand) StopContainers(c *cli.Context) {
                             log.Printf("Stopping gracefully containers %s on node %s", images[idxImage], nodes[idxNode])
                         }
                         for idxContainer := 0; idxContainer < len(containers); idxContainer++ {
-                            go func() {
+                            go func(container *dockerclient.Container, image string) {
                                 wg1.Add(1)
-                                if containers[idxContainer].Image ==  images[idxContainer] {
-                                    err := docker.StopContainer(containers[idxContainer].Id, timeout)
+                                if container.Image ==  image {
+                                    err := docker.StopContainer(container.Id, timeout)
                                     if err != nil {
                                         chanError <- err
                                     } else {
-                                        n, _ := d.Api.getNode(nodes[idxNode])
+                                        n, _ := d.Api.getNode(nodeAlias)
                                         chanContainer <- MDContainer{
                                             Node: n,
-                                            Container: &containers[idxContainer],
+                                            Container: container,
                                         }
                                     }
                                 }
                                 wg1.Done()
-
-                            }()
+                            }(&containers[idxContainer], images[idxImage])
                         }
                     }
-                    wg.Wait()
+                    wg1.Wait()
                 }
             }
             wg.Done()
-        }()
+        }(nodes[idxNode])
     }
-
     wg.Wait()
 
     close(chanContainer)
