@@ -38,6 +38,7 @@ func (dockerApi *DockerApi) CheckDockerNodes() {
 func (dockerApi *DockerApi) ConnectToDocker(nodeAlias string) (*dockerclient.DockerClient, error) {
 	node, err := dockerApi.getNode(nodeAlias)
 	if err != nil {
+        log.Print(err);
 		return nil, err
 	}
 	if node.Available == false {

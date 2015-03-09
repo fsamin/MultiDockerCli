@@ -191,7 +191,8 @@ func (d *DockerCommand) PullImage(c *cli.Context) {
             Node: pulledImage.Node,
             Name: pulledImage.Name,
             Success: pulledImage.Success,
-            Error: pulledImage.Error})
+            Error: pulledImage.Error,
+        })
     }
 
     d.Printer.PrintMDPulledImages(ret)
@@ -202,6 +203,8 @@ func (d *DockerCommand) PullImage(c *cli.Context) {
 }
 
 func (d *DockerCommand) StopContainers(c *cli.Context) {
+    //Check nodes
+    d.Api.CheckDockerNodes()
     //Get Verbose flag
     debug := c.GlobalBool("debug")
     //Get Nodes slice
@@ -212,19 +215,22 @@ func (d *DockerCommand) StopContainers(c *cli.Context) {
     timeout := c.Int("time")
 
 
-    chanContainer := make(chan MDContainer, len(nodes) * len(images))
-    chanError := make(chan error, len(nodes) * len(images))
+    chanContainer := make(chan MDContainer, len(nodes) * len(images) + 1)
+    chanError := make(chan error, len(nodes) * len(images) + 1)
 
     var wg sync.WaitGroup
 
     for idxNode := 0; idxNode < len(nodes); idxNode++ {
+        wg.Add(1)
         go func(nodeAlias string) {
-            wg.Add(1)
             log.Print("Connecting to " + nodeAlias)
             docker, err := d.Api.ConnectToDocker(nodeAlias)
             if err != nil {
                 chanError <- err
             } else {
+                if debug {
+                    log.Printf("Inspect containers on node %s", nodeAlias)
+                }
                 containers, err := docker.ListContainers(false, false, "")
                 if err != nil {
                     chanError <- err
@@ -232,11 +238,11 @@ func (d *DockerCommand) StopContainers(c *cli.Context) {
                     var wg1 sync.WaitGroup
                     for idxImage := 0; idxImage < len(images); idxImage++ {
                         if debug {
-                            log.Printf("Stopping gracefully containers %s on node %s", images[idxImage], nodes[idxNode])
+                            log.Printf("Stopping gracefully containers %s on node %s", images[idxImage], nodeAlias)
                         }
                         for idxContainer := 0; idxContainer < len(containers); idxContainer++ {
+                            wg1.Add(1)
                             go func(container *dockerclient.Container, image string) {
-                                wg1.Add(1)
                                 if container.Image ==  image {
                                     err := docker.StopContainer(container.Id, timeout)
                                     if err != nil {
